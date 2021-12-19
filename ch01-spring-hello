@@ -1,0 +1,85 @@
+ServiceOne:
+
+package com.ysLearning.service;
+
+public interface ServiceOne {
+    public void doSome();
+
+}
+
+ServiceOneImpl:
+
+package com.ysLearning.service.impl;
+
+import com.ysLearning.service.ServiceOne;
+
+public class ServiceOneImpl implements ServiceOne {
+
+    @Override
+    public void doSome() {
+        System.out.println("Success Run ServiceOneIMplm's doSome() Mehtod");
+    }
+}
+
+
+beans.xml:
+
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+<!--告诉spring创建对象
+     称为声明bean，告诉spring要创建某个类的对象
+     id:对象的自定义名称，唯一值，spring通过名称找到对象
+     class:类的全限定名称（不能是接口，因为spring是通过反射机制创建对象，必须使用类）
+     spring完成：SomeService sm=new SomeserviceIMpl();
+     spring是把创建好的对象放入到map中，spring框架中会有一个map存储对象
+     springMap.put(id值，对象)，如:springMap.put("ServiceOne",new ServiceOneImpl())
+
+    注意：一个bean标签只声明一个对象
+-->
+    <bean id="ServiceOne" class="com.ysLearning.service.impl.ServiceOneImpl"/>
+    <bean id="ServiceOne2" class="com.ysLearning.service.impl.ServiceOneImpl"/>
+
+
+</beans>
+<!--
+
+spring配置文件：
+1.beans：是根标签，spring把java对象称为bean
+2.xsd：是约束文件，与mybatis中的dtd一样,用来控制和限制beans文件中能出现的标签与格式
+-->
+
+Test:
+
+package com.ysLearning;
+
+import com.ysLearning.service.ServiceOne;
+import com.ysLearning.service.impl.ServiceOneImpl;
+import org.junit.Test;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public class TestMySpring {
+    //控制正转，自己创建对象
+    @Test
+    public void test01(){
+        ServiceOne serviceOne=new ServiceOneImpl();
+        serviceOne.doSome();
+    }
+
+    //使用spring自动创建对象
+    @Test
+
+    public void test02(){
+        //1.指定spring配置文件的名称
+        String config="beans.xml";
+        //2.创建表示spring容器的对象，ApplicationContext，这个对象就表示了spring容器，可以通过这个容器获取对象了
+        //ClassPathXmlApplicationContext表示从类路径中加载spring的配置文件
+        ApplicationContext ac=new ClassPathXmlApplicationContext(config);
+        //3.从容器中获取对象，值为配置文件中bean的id值
+        ServiceOne serviceOne=(ServiceOne) ac.getBean("ServiceOne");
+        //4.使用spring创建好的servicOne对象
+        serviceOne.doSome();
+    }
+}
