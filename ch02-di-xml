@@ -1,0 +1,195 @@
+项目结构树：
+├─ch02-di-xml
+│  ├─src
+│  │  ├─main
+│  │  │  ├─java
+│  │  │  │  └─com
+│  │  │  │      └─ysLearning
+│  │  │  │          ├─ba01
+│  │  │  │          └─ba02
+│  │  │  └─resources
+│  │  │      └─ba01
+│  │  └─test
+│  │      └─java
+│  │          └─com
+│  │              └─ysLearning
+│  │
+│  └─src
+└─tree
+
+
+School Class:
+package com.ysLearning.ba02;
+
+/**
+ * @author yansen
+ * @create 2021-12-22 17:17
+ */
+public class School {
+    private String name;
+    private String address;
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    @Override
+    public String toString() {
+        return "School{" +
+                "name='" + name + '\'' +
+                ", address='" + address + '\'' +
+                '}';
+    }
+}
+
+
+
+Student class:
+package com.ysLearning.ba02;
+
+/**
+ * @author yansen
+ * @create 2021-12-21 21:42
+ * set注入，基本类型赋值
+ */
+public class Student {
+
+    public Student(){
+
+        System.out.println("这是Studnet的无参构造方法");
+    }
+    private String name;
+    private int age;
+//    声明一个引用类型
+    private School school;
+
+    public void setSchool(School school) {
+        System.out.println("setSchool:"+school);
+        this.school = school;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+/*
+* 需创建的类必须要有set方法，没有会报错：name无法读写
+* 创建的类set方法不传值的话，输出结果也没有值
+* 先执行构造方法，再执行set方法
+*
+* */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    @Override
+    public String toString() {
+        return "Student{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                ", school=" + school +
+                '}';
+    }
+}
+
+
+applicationContext.xml:
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+<!--声明Student对象
+    di：给属性赋值
+    注入：就是赋值的意思
+    1.set注入（设置注入）：spring调用set方法，可以在set方法中完成属性赋值
+     1)简单类型的set注入
+       <bean id=" " class=" ">
+         <property name="属性名称"  value="要赋给属性的值"/>
+         <property...../>
+         一个property只能给一个属性赋值
+       </bean>
+-->
+    <bean id="myStudent" class="com.ysLearning.ba01.Student">
+        <property name="name" value="john"/> <!--执行setName()-->
+        <property name="age" value="27"/><!--执行setAge()-->
+    </bean>
+<!--spring set注入实际就是调用类属性的set方法-->
+    <bean id="mydate" class="java.util.Date">
+        <property name="time" value="78219877"/><!--setTime-->
+    </bean>
+
+
+
+<!--    2.引用类型的set注入：spring调用类的set方法
+       <bean id="xxx" class="yyy">
+         <property name="属性名称"  ref="要赋值引用对象的bean的id"/>
+       </bean>
+引用类型单独创建一个bean，进行赋值，再通过ref标志引用至主bean标签内，如下：
+
+-->
+<!-- 主bean标签，内含需要赋值的引用类型-School-->
+    <bean id="myStudent2" class="com.ysLearning.ba02.Student">
+        <property name="name" value="polo"/> <!--执行setName()-->
+        <property name="age" value="32"/><!--执行setAge()-->
+        <property name="school" ref="mySchool"/>
+    </bean>
+
+<!--  引用类型School的bean标签，在此标签赋值，再将已赋值引用对象赋值给Student标签-->
+    <bean id="mySchool" class="com.ysLearning.ba02.School">
+        <property name="name" value="SWUST"/><!--School的set方法-->
+        <property name="address" value="MIANYANG.scProvince"/><!--School的set方法-->
+    </bean>
+
+
+</beans>
+
+
+MyTest02 Class:
+
+package com.ysLearning;
+
+import com.ysLearning.ba02.Student;
+import com.ysLearning.ba02.School;
+import org.junit.Test;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+/**
+ * @author yansen
+ * @create 2021-12-22 17:21
+ */
+
+public class MyTest02 {
+    //不使用spring创建Student对象并传值
+    @Test
+    public void test03(){
+        Student stu=new Student();
+        stu.setName("jessy");
+        stu.setAge(38);
+        School school=new School();
+        school.setName("SWUST");
+        school.setAddress("MianYang.scProvince");
+        stu.setSchool(school);
+        System.out.println("Student=="+stu);
+    }
+
+    //使用Spring的引用类型set注入创建对象并赋值
+    @Test
+    public void test04(){
+        String config="ba01/applicationContext.xml";
+        ApplicationContext ac=new ClassPathXmlApplicationContext(config);
+        Student student=(Student) ac.getBean("myStudent2");
+        System.out.println("Student=="+student);
+    }
+}
