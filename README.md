@@ -72,3 +72,13 @@ spring使用ID实现了IOC功能，底层使用的是Java反射机制
 2）切面的执行位置，使用Pointcut表示切面执行的位置
 3）切面的执行时间，使用Advice表示时间，在目标方法之前还是之后
            
+6.aop的实现：aop是一个规范，是动态代理的一个规范化，是一个标准
+ aop技术实现的框架：
+ 1）spring：在spring内部实现了aop规范，能做aop的构造；
+            我们在项目中很少使用spring的aop实现，因为spring的aop比较笨重
+            spring主要在做事务处理时用aop
+            
+ 2）aspectJ：一个开源的专门做aop的框架，spring框架中集成了aspectJ框架，通过spring就能使用aspectJ的功能
+             aspectJ框架实现aop有两种方式：
+             1.使用xml的配置文件，配置全局事务
+             2.使用注解，我们在项目中一般都用注解实现aop，aspecJ有5哥注解
