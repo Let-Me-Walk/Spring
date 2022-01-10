@@ -81,4 +81,66 @@ spring使用ID实现了IOC功能，底层使用的是Java反射机制
  2）aspectJ：一个开源的专门做aop的框架，spring框架中集成了aspectJ框架，通过spring就能使用aspectJ的功能
              aspectJ框架实现aop有两种方式：
              1.使用xml的配置文件，配置全局事务
-             2.使用注解，我们在项目中一般都用注解实现aop，aspecJ有5哥注解
+             2.使用注解，我们在项目中一般都用注解实现aop，aspecJ有5个注解
+               1）Before
+               2）AfterReturning
+               3）AfterThrowing
+               4）Around
+               5）After
+               
+ 
+ 
+ 
+ ====================================================================================================================================
+ 第三章：spring整合mybatis
+ 
+ to be continue..........
+ 
+ 
+ ====================================================================================================================================
+ 第四章：spring事务处理
+ 
+ 一.处理事务需要做什么？怎么做？
+ spring处理事务的的模型，使用的步骤都是固定的。把事务使用的信息提供给spring就可以了
+ 
+ 1. 事务内部 提交、回滚使用的是事务管理器对象，代替你完成commit，rollback
+    
+    1)事务管理器：是一个接口和接口的众多实现类组成的。
+    
+    2)接口：platformTranscationManager，定义了事务处理的重要方法-commit()、rollback().
+    
+    3)实现类：spring把每一种数据库访问技术对应的事务处理类都封装创建好了。
+           mybatis访问数据库——spring创建好的是DataSourceTranscationManager
+           hibernate访问数据库——spring创建好的是HibernateTranscationManager
+          
+    4)怎么使用：你需要告诉spring需要用的是哪种数据库访问技术
+    5)如何告诉：在spring配置文件中使用<bean>标签声明使用的数据库访问技术对应的实现类就可以了
+            如，使用mybatis访问数据库技术：<bean id="xxx" class="...DataSourceTranscationManager">
+                使用Hibernate访问数据库技术：<bean id="xxx" class="...HibernateTranscationManager">
+  
+ 2.你的业务方法需要什么样的事务，向spring说明需要事务的类型
+   事务类型由三部分组成：事务隔离级别、事务传播行为、事务超时时间
+   1）事务隔离级别：一共四个级别，若不选择则采用默认级别（Default）。mysql 默认级别为REPEATABLE_READ，Oracle默认级别为READ_COMMITTED
+      READ_UNCOMMITTED：读未提交，未解决任何并发问题
+      READ_COMMITTED：读已提交，解决脏读问题，存在不可重复读与幻读问题
+      REPEATABLE_READ:可重复读，解决脏读、不可重复读、幻读问题
+      SERIALIZABLE:串行化，无并发问题
+  
+   2)事务传播行为：控制业务方法是否有事务，是怎么样的事务的，一共有7个传播行为，表示业务方法调用时，事务在方法间是怎么样使用的
+     PROPAGATION_REQUIRED
+     PROPAGATION_REQUIRED_NEW
+     PROPAGATION SUPPORTS
+     以上三个为常用重要的
+     PROPAGATION_MANDATORY
+     PROPAGATION_NESTED
+     PROPAGATION_NEVER
+     PROPGATION_NOT_SUPPORTED
+  
+  3）事务的超时时间：表示一个方法最长允许的执行时间，如果方法执行超过了时间，事务就回滚，单位是秒，整数值，默认为-1，一般不做改动
+  
+ 3.事务commit、rollback的时机：
+   1）当业务方法执行成功，没有异常抛出，则当方法执行完毕，spring在方法执行完成后提交事务，调用事务管理器的commit
+   2）当业务方法抛出运行时异常或error是，spring执行回滚操作，调用事务管理器的rollback
+      运行时异常定义：RunTimeException，它与它的子类都为运行时异常，如NullPointException、NumberFormatException等
+   3）当你的方法抛出非运行时异常，主要是受控异常时，提交事务，调用事务管理器的commit
+      受控异常：代码中必须处理的异常，如IOException、SQLException 
