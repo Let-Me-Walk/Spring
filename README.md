@@ -144,3 +144,46 @@ spring使用ID实现了IOC功能，底层使用的是Java反射机制
       运行时异常定义：RunTimeException，它与它的子类都为运行时异常，如NullPointException、NumberFormatException等
    3）当你的方法抛出非运行时异常，主要是受控异常时，提交事务，调用事务管理器的commit
       受控异常：代码中必须处理的异常，如IOException、SQLException 
+  
+spring框架提供的事务处理方案：
+  
+一、适合中小项目使用的，注解方案:
+  1）spring框架自己用aop封装实现给业务方法增加事务的功能，使用@Transactional注解增加事务
+  2）@Transactional注解是spring框架自己注解，放在public方法上（会自动忽略非public方法），表示当前方法具有事务
+  3）可以给@Transactional注解的属性赋值，表示具体的隔离级别，传播行为，异常信息等。一般直接使用@Transactional默认值，不进行赋值，
+  
+ 2.使用@Transactional的步骤：
+  1）声明事务管理器对象：
+     <bean id="transactionManaer" class="DataSourcTransactionManager">
+       <property name="dataSource" ref="myDataSource"/>
+     </bean>
+  
+  2)开启事务注解驱动，告诉spring框架，需要使用注解的方式管理事务
+    <tx:annotation-driven transaction-manager="事务管理器对象 xxx">
+    spring使用aop的@Around环绕通知来实现给业务方法加入事务的功能，在业务方法执行之前先开启事务，业务方法执行之后提交/回滚事务
+    底层实现：@Around("要增加事务功能的业务方法")
+             Object myAround（）{
+               开启事务，spring自动开启
+             try{
+                    buy(1001,100);
+                    spring的事务管理器.commit();
+                }catch(Exception ex){
+                   spring的事务管理器.rollback();
+                 }
+          }
+  3.使用方式，配置文件配置好后，在需要事务处理的业务方法上方加上@Transactional注解即可。
+      
+ 二、适合大型项目，有很多的类、方法需要大量配置事务
+     使用aspectj框架功能，在spring的配置文件中声明类、方法需要的事务，这种方式，业务方法和事务配置完全分离，在配置文件中完成所有事务配置
+      
+     实现步骤：
+       1）加入aspectj Maven依赖
+      
+       2）声明事务管理器对象
+         <bean id="transactionManager" class="...DataSourceTransactionManager">
+           
+       3)声明方法需要的事务类型（配置方法隔离级别、传播行为、超时时间）
+           
+       4）配置aop，指定哪些类需要创建代理
+           
+     
